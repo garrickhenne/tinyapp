@@ -12,6 +12,16 @@ app.get('/', (req, res) => {
   res.send('Hello!');
 });
 
+app.get('/urls', (req, res) => {
+  res.render('urls_index', {
+    urls: urlDatabase
+  });
+});
+
+app.get('/url:id', (req, res) => {
+  const urlId = req.params.id;
+});
+
 app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
