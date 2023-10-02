@@ -18,8 +18,13 @@ app.get('/urls', (req, res) => {
   });
 });
 
-app.get('/url:id', (req, res) => {
+app.get('/urls/:id', (req, res) => {
   const urlId = req.params.id;
+  console.log(urlId);
+  res.render('urls_show', {
+    urlId: urlId,
+    longURL: urlDatabase[urlId]
+  });
 });
 
 app.get('/urls.json', (req, res) => {
