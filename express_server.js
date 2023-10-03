@@ -27,6 +27,8 @@ const users = {
   },
 };
 
+const isUserLoggedIn = (idCookie) => users[idCookie];
+
 app.get('/', (req, res) => {
   // In the future should redirect to login page if not logged in already.
   res.redirect('/urls');
@@ -34,7 +36,7 @@ app.get('/', (req, res) => {
 
 app.get('/register', (req, res) => {
   // If cookie already exists, meaning there is a user, just redirect to /urls.
-  if (users[req.cookies[USER_ID_KEY_COOKIE]]) {
+  if (isUserLoggedIn(req.cookies[USER_ID_KEY_COOKIE])) {
     res.redirect('/urls');
     return;
   }
@@ -74,7 +76,7 @@ app.post('/register', (req, res) => {
 app.get('/login', (req, res) => {
   // If cookie already exists, meaning there is a user, just redirect to /urls.
   console.log('Currently in login page, current available users:', users);
-  if (users[req.cookies[USER_ID_KEY_COOKIE]]) {
+  if (isUserLoggedIn(req.cookies[USER_ID_KEY_COOKIE])) {
     res.redirect('/urls');
     return;
   }
@@ -120,7 +122,7 @@ app.get('/urls', (req, res) => {
 
 app.post('/urls', (req, res) => {
   // Only logged in users can enter.
-  if (!users[req.cookies[USER_ID_KEY_COOKIE]]) {
+  if (!isUserLoggedIn(req.cookies[USER_ID_KEY_COOKIE])) {
     res.status(400).send('Must be logged in to shorten URLS.');
     return;
   }
@@ -139,7 +141,7 @@ app.post('/urls', (req, res) => {
 
 app.get('/urls/new', (req, res) => {
   // Only logged in users can enter.
-  if (!users[req.cookies[USER_ID_KEY_COOKIE]]) {
+  if (!isUserLoggedIn(req.cookies[USER_ID_KEY_COOKIE])) {
     res.redirect('/login');
     return;
   }
@@ -180,6 +182,12 @@ app.get('/u/:id', (req, res) => {
 
   // Redirect to original URL name.
   const longURL = urlDatabase[id];
+
+  // If there is no longURL associated with short ID, send error code.
+  if (!longURL) {
+    res.status(400).send('Long URL does not exist.');
+    return;
+  }
   res.redirect(longURL);
 });
 
