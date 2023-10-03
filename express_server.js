@@ -4,6 +4,7 @@ const { generateRandomString } = require('./util');
 
 const app = express();
 const PORT = 8080;
+const USERNAME_KEY = 'username';
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -18,22 +19,29 @@ app.get('/', (req, res) => {
   res.redirect('/urls');
 });
 
+app.get('/register', (req, res) => {
+  const usernameCookie = req.cookies[USERNAME_KEY];
+  res.render('register', {
+    username: usernameCookie
+  });
+});
+
 app.post('/login', (req, res) => {
   const { username } = req.body;
-  res.cookie('username', username);
+  res.cookie(USERNAME_KEY, username);
   res.redirect('/urls');
 });
 
 app.post('/logout', (req, res) => {
-  console.log('cookies', req.cookies['username']);
-  if (req.cookies['username']) {
-    res.clearCookie('username');
+  console.log('cookies', req.cookies[USERNAME_KEY]);
+  if (req.cookies[USERNAME_KEY]) {
+    res.clearCookie(USERNAME_KEY);
   }
   res.redirect('/urls');
 });
 
 app.get('/urls', (req, res) => {
-  const usernameCookie = req.cookies['username'];
+  const usernameCookie = req.cookies[USERNAME_KEY];
   res.render('urls_index', {
     username: usernameCookie,
     urls: urlDatabase
@@ -41,7 +49,7 @@ app.get('/urls', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
-  const usernameCookie = req.cookies['username'];
+  const usernameCookie = req.cookies[USERNAME_KEY];
   res.render('urls_new', {
     username: usernameCookie
   });
@@ -77,7 +85,7 @@ app.post('/urls/:id/delete', (req, res) => {
 
 app.get('/urls/:id', (req, res) => {
   const urlId = req.params.id;
-  const usernameCookie = req.cookies['username'];
+  const usernameCookie = req.cookies[USERNAME_KEY];
   res.render('urls_show', {
     username: usernameCookie,
     urlId: urlId,
