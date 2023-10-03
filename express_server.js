@@ -184,32 +184,6 @@ app.get('/urls/new', (req, res) => {
   });
 });
 
-
-app.post('/urls/:id', (req, res) => {
-  // Send error if user is not logged in.
-  if (!isUserLoggedIn(req.cookies[USER_ID_KEY_COOKIE])) {
-    res.status(400).send('Must be logged in to access short URL.');
-    return;
-  }
-
-  const usersURLs = urlsForUser(req.cookies[USER_ID_KEY_COOKIE]);
-  const { id } = req.params;
-  if (!usersURLs[id]) {
-    res.status(400).send('Trying to access short URL that does not belong to user.');
-    return;
-  }
-
-  const newId = req.body.newLongURL;
-  urlDatabase[id].longURL = newId;
-  res.redirect('/urls');
-});
-
-app.post('/urls/:id/delete', (req, res) => {
-  const urlId = req.params.id;
-  delete urlDatabase[urlId];
-  res.redirect('/urls');
-});
-
 app.get('/urls/:id', (req, res) => {
   // Send error if user is not logged in.
   if (!isUserLoggedIn(req.cookies[USER_ID_KEY_COOKIE])) {
@@ -218,10 +192,15 @@ app.get('/urls/:id', (req, res) => {
   }
 
   const userId = req.cookies[USER_ID_KEY_COOKIE];
-  const usersURLs = urlsForUser(userId);
   const urlId = req.params.id;
-  if (!usersURLs[urlId]) {
-    res.status(400).send('Trying to access short URL that does not belong to user.');
+
+  if (!urlDatabase[urlId]) {
+    res.status(400).send('short url id does not exist.');
+    return;
+  }
+
+  if (urlDatabase[urlId].userID !== userId) {
+    res.status(400).send('Cannot view short ids that do not belong to you.');
     return;
   }
 
@@ -230,6 +209,56 @@ app.get('/urls/:id', (req, res) => {
     longURL: urlDatabase[urlId].longURL,
     user: users[userId]
   });
+});
+
+
+app.post('/urls/:id', (req, res) => {
+  // Send error if user is not logged in.
+  if (!isUserLoggedIn(req.cookies[USER_ID_KEY_COOKIE])) {
+    res.status(400).send('Must be logged in to access short URL.');
+    return;
+  }
+
+  const userID = req.cookies[USER_ID_KEY_COOKIE];
+  const urlId = req.params.id;
+
+  if (!urlDatabase[urlId]) {
+    res.status(400).send('Short URL does not exist');
+    return;
+  }
+
+  if (urlDatabase[urlId].userID !== userID) {
+    res.status(400).send('Cannot access short URL that does not belong to user.');
+    return;
+  }
+
+  const newId = req.body.newLongURL;
+  urlDatabase[urlId].longURL = newId;
+  res.redirect('/urls');
+});
+
+app.post('/urls/:id/delete', (req, res) => {
+  // Send error if user is not logged in.
+  if (!isUserLoggedIn(req.cookies[USER_ID_KEY_COOKIE])) {
+    res.status(400).send('Must be logged in to access short URL.');
+    return;
+  }
+
+  const urlId = req.params.id;
+
+  if (!urlDatabase[urlId]) {
+    res.status(400).send('short url id does not exist.');
+    return;
+  }
+
+  const userId = req.cookies[USER_ID_KEY_COOKIE];
+  if (urlDatabase[urlId].userID !== userId) {
+    res.status(400).send('Cannot delete urls that do not belong to you.');
+    return;
+  }
+
+  delete urlDatabase[urlId];
+  res.redirect('/urls');
 });
 
 app.get('/u/:id', (req, res) => {
