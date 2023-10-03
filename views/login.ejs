@@ -13,28 +13,21 @@
 
   <body>
     <%- include('partials/_header') %>
-    <div class="card text-center">
-      <div class="card-header"></div>
-      <div class="card-body">
-        <h5 class="card-title">TinyURL for: <%= longURL %></h5>
-        <form class="form-inline" method="POST" action="/urls/<%= urlId %>" style="justify-content: center; gap: 5px;">
-          <label for="newLongURL">Update redirect URL:</label>
-          <input 
-          class="form-control"
-          type="text"
-          name="newLongURL"
-          placeholder="http://"
-          />
-          <button type="submit" class="btn btn-outline-success">
-            Update
-          </button>
-        </form>
-        <p class="card-text">
-          Short URL ID: <a href="/u/<%= urlId %>" target="_blank"><%= urlId %></a>
-        </p>
-      </div>
-      <div class="card-footer text-muted"></div>
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; width: 100%; flex-direction: column;">
+      <h2 class='card-title' style="text-align: center;">Login</h2>
+      <form method="POST" action="/login" style="display: flex; flex-direction: column; align-items: center;">
+        <div class="form-group" style="display: flex; flex-direction: row;">
+          <label for="email" style="width: 50%;">Email address:</label>
+          <input type="email" name='email' class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email" style="width: 50%;">
+        </div>
+        <div class="form-group" style="display: flex; flex-direction: row;">
+          <label for="password" style="width: 50%;">Password:</label>
+          <input type="password" name='password' class="form-control" id="password" placeholder="Password" style="width: 50%;">
+        </div>
+        <button type="submit" class="btn btn-primary" style="margin-top: 20px;">Login</button>
+      </form>
     </div>
+
     <!-- Bootstrap JS -->
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"

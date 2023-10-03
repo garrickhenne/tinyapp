@@ -5,6 +5,18 @@ const generateRandomString = () => {
   return Math.random().toString(36).substring(2, 8);
 };
 
+// Return true if email exists in users object.
+const getUserByEmail = (users, email) => {
+  for (const user in users) {
+    if (users[user].email === email) {
+      return users[user];
+    }
+  }
+
+  return null;
+};
+
 module.exports = {
-  generateRandomString
+  generateRandomString,
+  getUserByEmail
 };
