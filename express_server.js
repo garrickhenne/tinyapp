@@ -29,7 +29,7 @@ app.post('/urls', (req, res) => {
   console.log(req.body);
   const randomString = generateRandomString();
   urlDatabase[randomString] = req.body.longURL;
-  res.send('OK');
+  res.redirect(`/urls/${randomString}`);
 });
 
 app.get('/urls/:id', (req, res) => {

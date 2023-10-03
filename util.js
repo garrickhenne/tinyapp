@@ -1,5 +1,5 @@
-const generateRandomString = () {
-
+const generateRandomString = () => {
+  return 'a4mt2f';
 };
 
 module.exports = {
