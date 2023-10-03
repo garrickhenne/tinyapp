@@ -1,7 +1,10 @@
 const express = require('express');
+const { generateRandomString } = require('./util');
+
 const app = express();
 const PORT = 8080;
 app.set('view engine', 'ejs');
+app.use(express.urlencoded({ extended: true }));
 
 const urlDatabase = {
   'b2xVn2': 'http://www.lighthouselabs.ca',
@@ -18,6 +21,17 @@ app.get('/urls', (req, res) => {
   });
 });
 
+app.get('/urls/new', (req, res) => {
+  res.render('urls_new');
+});
+
+app.post('/urls', (req, res) => {
+  console.log(req.body);
+  const randomString = generateRandomString();
+  urlDatabase[randomString] = req.body.longURL;
+  res.send('OK');
+});
+
 app.get('/urls/:id', (req, res) => {
   const urlId = req.params.id;
   console.log(urlId);
@@ -26,6 +40,7 @@ app.get('/urls/:id', (req, res) => {
     longURL: urlDatabase[urlId]
   });
 });
+
 
 app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
