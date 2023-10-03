@@ -119,6 +119,11 @@ app.get('/urls', (req, res) => {
 });
 
 app.post('/urls', (req, res) => {
+  // Only logged in users can enter.
+  if (!users[req.cookies[USER_ID_KEY_COOKIE]]) {
+    res.status(400).send('Must be logged in to shorten URLS.');
+    return;
+  }
   const randomString = generateRandomString();
 
   if (urlDatabase[randomString]) {
