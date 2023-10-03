@@ -133,17 +133,17 @@ app.post('/logout', (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
+  const userID = req.cookies[USER_ID_KEY_COOKIE];
   console.log('ALL URLS FOR ALL USERS:', urlDatabase);
-  if (!isUserLoggedIn(req.cookies[USER_ID_KEY_COOKIE])) {
+  if (!isUserLoggedIn(userID)) {
     res.status(400).send('Must be logged in to view shortened URLs.');
     return;
   }
 
-  const userId = req.cookies[USER_ID_KEY_COOKIE];
-  const usersURLs = urlsForUser(userId);
+  const usersURLs = urlsForUser(userID);
   res.render('urls_index', {
     urls: usersURLs,
-    user: users[userId]
+    user: users[userID]
   });
 });
 
@@ -172,92 +172,92 @@ app.post('/urls', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
+  const userID = req.cookies[USER_ID_KEY_COOKIE];
   // Only logged in users can enter.
-  if (!isUserLoggedIn(req.cookies[USER_ID_KEY_COOKIE])) {
+  if (!isUserLoggedIn(userID)) {
     res.redirect('/login');
     return;
   }
 
-  const userId = req.cookies[USER_ID_KEY_COOKIE];
   res.render('urls_new', {
-    user: users[userId]
+    user: users[userID]
   });
 });
 
 app.get('/urls/:id', (req, res) => {
+  const userID = req.cookies[USER_ID_KEY_COOKIE];
   // Send error if user is not logged in.
-  if (!isUserLoggedIn(req.cookies[USER_ID_KEY_COOKIE])) {
+  if (!isUserLoggedIn(userID)) {
     res.status(400).send('Must be logged in to access short URL.');
     return;
   }
 
-  const userId = req.cookies[USER_ID_KEY_COOKIE];
-  const urlId = req.params.id;
+  const urlID = req.params.id;
 
-  if (!urlDatabase[urlId]) {
+  if (!urlDatabase[urlID]) {
     res.status(400).send('short url id does not exist.');
     return;
   }
 
-  if (urlDatabase[urlId].userID !== userId) {
+  if (urlDatabase[urlID].userID !== userID) {
     res.status(400).send('Cannot view short ids that do not belong to you.');
     return;
   }
 
   res.render('urls_show', {
-    urlId: urlId,
-    longURL: urlDatabase[urlId].longURL,
-    user: users[userId]
+    urlId: urlID,
+    longURL: urlDatabase[urlID].longURL,
+    user: users[userID]
   });
 });
 
 
 app.post('/urls/:id', (req, res) => {
+  const userID = req.cookies[USER_ID_KEY_COOKIE];
   // Send error if user is not logged in.
-  if (!isUserLoggedIn(req.cookies[USER_ID_KEY_COOKIE])) {
+  if (!isUserLoggedIn(userID)) {
     res.status(400).send('Must be logged in to access short URL.');
     return;
   }
 
-  const userID = req.cookies[USER_ID_KEY_COOKIE];
-  const urlId = req.params.id;
+  const urlID = req.params.id;
 
-  if (!urlDatabase[urlId]) {
+  if (!urlDatabase[urlID]) {
     res.status(400).send('Short URL does not exist');
     return;
   }
 
-  if (urlDatabase[urlId].userID !== userID) {
+  if (urlDatabase[urlID].userID !== userID) {
     res.status(400).send('Cannot access short URL that does not belong to user.');
     return;
   }
 
   const newId = req.body.newLongURL;
-  urlDatabase[urlId].longURL = newId;
+  urlDatabase[urlID].longURL = newId;
   res.redirect('/urls');
 });
 
 app.post('/urls/:id/delete', (req, res) => {
+  const userID = req.cookies[USER_ID_KEY_COOKIE];
   // Send error if user is not logged in.
-  if (!isUserLoggedIn(req.cookies[USER_ID_KEY_COOKIE])) {
+  if (!isUserLoggedIn(userID)) {
     res.status(400).send('Must be logged in to access short URL.');
     return;
   }
 
-  const urlId = req.params.id;
+  const urlID = req.params.id;
 
-  if (!urlDatabase[urlId]) {
+  if (!urlDatabase[urlID]) {
     res.status(400).send('short url id does not exist.');
     return;
   }
 
-  const userId = req.cookies[USER_ID_KEY_COOKIE];
-  if (urlDatabase[urlId].userID !== userId) {
+  if (urlDatabase[urlID].userID !== userID) {
     res.status(400).send('Cannot delete urls that do not belong to you.');
     return;
   }
 
-  delete urlDatabase[urlId];
+  delete urlDatabase[urlID];
   res.redirect('/urls');
 });
 
