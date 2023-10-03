@@ -4,7 +4,7 @@ const { generateRandomString } = require('./util');
 
 const app = express();
 const PORT = 8080;
-const USERNAME_KEY = 'username';
+const USER_ID_KEY_COOKIE = 'user_id';
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -33,13 +33,15 @@ app.get('/', (req, res) => {
 });
 
 app.get('/register', (req, res) => {
-  const usernameCookie = req.cookies[USERNAME_KEY];
+  const userId = req.cookies[USER_ID_KEY_COOKIE];
   res.render('register', {
-    username: usernameCookie
+    user: users[userId]
   });
 });
 
 app.post('/register', (req, res) => {
+  // TODO: Add validation for empty password or email. (Or maybe try to do this check client side)
+  // TODO: Add validation for email already in use.
   const { email, password } = req.body;
   console.log('body', req.body);
   const id = generateRandomString();
@@ -58,31 +60,30 @@ app.post('/register', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  const { username } = req.body;
-  res.cookie(USERNAME_KEY, username);
+  // Currently this endpoint is dead.
   res.redirect('/urls');
 });
 
 app.post('/logout', (req, res) => {
-  console.log('cookies', req.cookies[USERNAME_KEY]);
-  if (req.cookies[USERNAME_KEY]) {
-    res.clearCookie(USERNAME_KEY);
+  console.log('cookies', req.cookies[USER_ID_KEY_COOKIE]);
+  if (req.cookies[USER_ID_KEY_COOKIE]) {
+    res.clearCookie(USER_ID_KEY_COOKIE);
   }
   res.redirect('/urls');
 });
 
 app.get('/urls', (req, res) => {
-  const usernameCookie = req.cookies[USERNAME_KEY];
+  const userId = req.cookies[USER_ID_KEY_COOKIE];
   res.render('urls_index', {
-    username: usernameCookie,
-    urls: urlDatabase
+    urls: urlDatabase,
+    user: users[userId]
   });
 });
 
 app.get('/urls/new', (req, res) => {
-  const usernameCookie = req.cookies[USERNAME_KEY];
+  const userId = req.cookies[USER_ID_KEY_COOKIE];
   res.render('urls_new', {
-    username: usernameCookie
+    user: users[userId]
   });
 });
 
@@ -116,11 +117,11 @@ app.post('/urls/:id/delete', (req, res) => {
 
 app.get('/urls/:id', (req, res) => {
   const urlId = req.params.id;
-  const usernameCookie = req.cookies[USERNAME_KEY];
+  const userId = req.cookies[USER_ID_KEY_COOKIE];
   res.render('urls_show', {
-    username: usernameCookie,
     urlId: urlId,
-    longURL: urlDatabase[urlId]
+    longURL: urlDatabase[urlId],
+    user: users[userId]
   });
 });
 
