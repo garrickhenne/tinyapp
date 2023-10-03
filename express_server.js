@@ -33,6 +33,19 @@ const users = {
   },
 };
 
+const urlsForUser = (userId) => {
+  let usersURLs = {};
+  for (const urlIdKey in urlDatabase) {
+    if (userId === urlDatabase[urlIdKey].userID) {
+      usersURLs[urlIdKey] = {
+        longURL: urlDatabase[urlIdKey].longURL
+      };
+    }
+  }
+
+  return usersURLs;
+};
+
 const isUserLoggedIn = (idCookie) => users[idCookie];
 
 app.get('/', (req, res) => {
@@ -120,14 +133,16 @@ app.post('/logout', (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
+  console.log('ALL URLS FOR ALL USERS:', urlDatabase);
   if (!isUserLoggedIn(req.cookies[USER_ID_KEY_COOKIE])) {
     res.status(400).send('Must be logged in to view shortened URLs.');
     return;
   }
 
   const userId = req.cookies[USER_ID_KEY_COOKIE];
+  const usersURLs = urlsForUser(userId);
   res.render('urls_index', {
-    urls: urlDatabase,
+    urls: usersURLs,
     user: users[userId]
   });
 });
@@ -147,10 +162,11 @@ app.post('/urls', (req, res) => {
     res.statusCode = 500;
     res.send('Internal server error. Please try again.');
   }
-  const { longURL, userId } = req.body;
+  const { longURL } = req.body;
+  const userID = users[req.cookies[USER_ID_KEY_COOKIE]].id;
   urlDatabase[randomString] = {
     longURL,
-    userId
+    userID
   };
   res.redirect(`/urls/${randomString}`);
 });
@@ -170,6 +186,12 @@ app.get('/urls/new', (req, res) => {
 
 
 app.post('/urls/:id', (req, res) => {
+  // Send error if user is not logged in.
+  // if (!isUserLoggedIn(req.cookies[USER_ID_KEY_COOKIE])) {
+  //   res.status(400).send('Must be logged in to access short URL.');
+  //   return;
+  // }
+
   const { id } = req.params;
   const newId = req.body.newLongURL;
   urlDatabase[id].longURL = newId;
@@ -183,6 +205,12 @@ app.post('/urls/:id/delete', (req, res) => {
 });
 
 app.get('/urls/:id', (req, res) => {
+  // Send error if user is not logged in.
+  // if (!isUserLoggedIn(req.cookies[USER_ID_KEY_COOKIE])) {
+  //   res.status(400).send('Must be logged in to access short URL.');
+  //   return;
+  // }
+
   const urlId = req.params.id;
   const userId = req.cookies[USER_ID_KEY_COOKIE];
   res.render('urls_show', {
