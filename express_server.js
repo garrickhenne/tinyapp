@@ -34,7 +34,7 @@ app.get('/', (req, res) => {
 
 app.get('/register', (req, res) => {
   // If cookie already exists, meaning there is a user, just redirect to /urls.
-  if (req.cookies[USER_ID_KEY_COOKIE] && users[req.cookies[USER_ID_KEY_COOKIE]]) {
+  if (users[req.cookies[USER_ID_KEY_COOKIE]]) {
     res.redirect('/urls');
     return;
   }
@@ -74,7 +74,7 @@ app.post('/register', (req, res) => {
 app.get('/login', (req, res) => {
   // If cookie already exists, meaning there is a user, just redirect to /urls.
   console.log('Currently in login page, current available users:', users);
-  if (req.cookies[USER_ID_KEY_COOKIE] && users[req.cookies[USER_ID_KEY_COOKIE]]) {
+  if (users[req.cookies[USER_ID_KEY_COOKIE]]) {
     res.redirect('/urls');
     return;
   }
@@ -133,6 +133,12 @@ app.post('/urls', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
+  // Only logged in users can enter.
+  if (!users[req.cookies[USER_ID_KEY_COOKIE]]) {
+    res.redirect('/login');
+    return;
+  }
+
   const userId = req.cookies[USER_ID_KEY_COOKIE];
   res.render('urls_new', {
     user: users[userId]
