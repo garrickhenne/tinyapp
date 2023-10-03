@@ -9,7 +9,7 @@ const generateRandomString = () => {
 const getUserByEmail = (users, email) => {
   for (const user in users) {
     if (users[user].email === email) {
-      return user;
+      return users[user];
     }
   }
 
