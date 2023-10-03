@@ -120,6 +120,11 @@ app.post('/logout', (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
+  if (!isUserLoggedIn(req.cookies[USER_ID_KEY_COOKIE])) {
+    res.status(400).send('Must be logged in to view shortened URLs.');
+    return;
+  }
+
   const userId = req.cookies[USER_ID_KEY_COOKIE];
   res.render('urls_index', {
     urls: urlDatabase,
