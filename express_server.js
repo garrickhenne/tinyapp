@@ -103,13 +103,6 @@ app.get('/urls', (req, res) => {
   });
 });
 
-app.get('/urls/new', (req, res) => {
-  const userId = req.cookies[USER_ID_KEY_COOKIE];
-  res.render('urls_new', {
-    user: users[userId]
-  });
-});
-
 app.post('/urls', (req, res) => {
   const randomString = generateRandomString();
 
@@ -123,6 +116,14 @@ app.post('/urls', (req, res) => {
   urlDatabase[randomString] = req.body.longURL;
   res.redirect(`/urls/${randomString}`);
 });
+
+app.get('/urls/new', (req, res) => {
+  const userId = req.cookies[USER_ID_KEY_COOKIE];
+  res.render('urls_new', {
+    user: users[userId]
+  });
+});
+
 
 app.post('/urls/:id', (req, res) => {
   const { id } = req.params;
