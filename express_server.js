@@ -40,7 +40,7 @@ app.post('/urls', (req, res) => {
   res.redirect(`/urls/${randomString}`);
 });
 
-app.post('/urls/:id/update', (req, res) => {
+app.post('/urls/:id', (req, res) => {
   const { id } = req.params;
   const newId = req.body.newLongURL;
   urlDatabase[id] = newId;
