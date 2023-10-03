@@ -41,6 +41,14 @@ app.get('/urls/:id', (req, res) => {
   });
 });
 
+app.get('/u/:id', (req, res) => {
+  // Get short ID from request params.
+  const { id } = req.params;
+
+  // Redirect to original URL name.
+  const longURL = urlDatabase[id];
+  res.redirect(longURL);
+});
 
 app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
