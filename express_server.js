@@ -74,6 +74,7 @@ app.post('/register', (req, res) => {
   }
 
   users[id] = newUser;
+  res.cookie(USER_ID_KEY_COOKIE, id);
 
   console.log(`New user: ${newUser.email} created!`);
   res.redirect('/urls');
@@ -132,6 +133,7 @@ app.post('/urls', (req, res) => {
     res.status(400).send('Must be logged in to shorten URLS.');
     return;
   }
+
   const randomString = generateRandomString();
 
   if (urlDatabase[randomString]) {
@@ -140,8 +142,11 @@ app.post('/urls', (req, res) => {
     res.statusCode = 500;
     res.send('Internal server error. Please try again.');
   }
-
-  urlDatabase[randomString] = req.body.longURL;
+  const { longURL, userId } = req.body;
+  urlDatabase[randomString] = {
+    longURL,
+    userId
+  };
   res.redirect(`/urls/${randomString}`);
 });
 
@@ -162,7 +167,7 @@ app.get('/urls/new', (req, res) => {
 app.post('/urls/:id', (req, res) => {
   const { id } = req.params;
   const newId = req.body.newLongURL;
-  urlDatabase[id] = newId;
+  urlDatabase[id].longURL = newId;
   res.redirect('/urls');
 });
 
@@ -177,7 +182,7 @@ app.get('/urls/:id', (req, res) => {
   const userId = req.cookies[USER_ID_KEY_COOKIE];
   res.render('urls_show', {
     urlId: urlId,
-    longURL: urlDatabase[urlId],
+    longURL: urlDatabase[urlId].longURL,
     user: users[userId]
   });
 });
@@ -187,7 +192,7 @@ app.get('/u/:id', (req, res) => {
   const { id } = req.params;
 
   // Redirect to original URL name.
-  const longURL = urlDatabase[id];
+  const longURL = urlDatabase[id].longURL;
 
   // If there is no longURL associated with short ID, send error code.
   if (!longURL) {
