@@ -14,6 +14,19 @@ const urlDatabase = {
   '9sm5xK': 'http://www.google.com'
 };
 
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+};
+
 app.get('/', (req, res) => {
   // In the future should redirect to login page if not logged in already.
   res.redirect('/urls');
@@ -24,6 +37,24 @@ app.get('/register', (req, res) => {
   res.render('register', {
     username: usernameCookie
   });
+});
+
+app.post('/register', (req, res) => {
+  const { email, password } = req.body;
+  console.log('body', req.body);
+  const id = generateRandomString();
+  const newUser = {
+    id,
+    email,
+    password
+  };
+  users[id] = newUser;
+
+  res.cookie('user_id', id);
+
+  console.log(`New user: ${newUser.email} created!`);
+  console.log('Current users: ', users);
+  res.redirect('/urls');
 });
 
 app.post('/login', (req, res) => {
