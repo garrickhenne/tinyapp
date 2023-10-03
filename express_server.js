@@ -1,6 +1,7 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const { generateRandomString, getUserByEmail } = require('./util');
+const bcrypt = require('bcryptjs');
 
 const app = express();
 const PORT = 8080;
@@ -21,16 +22,16 @@ const urlDatabase = {
 };
 
 const users = {
-  aJ48lW: {
-    id: "aJ48lW",
-    email: "user@example.com",
-    password: "123",
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk",
-  },
+  // aJ48lW: {
+  //   id: "aJ48lW",
+  //   email: "user@example.com",
+  //   password: "123",
+  // },
+  // user2RandomID: {
+  //   id: "user2RandomID",
+  //   email: "user2@example.com",
+  //   password: "dishwasher-funk",
+  // },
 };
 
 const urlsForUser = (userId) => {
@@ -73,11 +74,12 @@ app.post('/register', (req, res) => {
     return;
   }
 
+  const hashedPassword = bcrypt.hashSync(password, 10);
   const id = generateRandomString();
   const newUser = {
     id,
     email,
-    password
+    password: hashedPassword
   };
 
   if (getUserByEmail(users, newUser.email)) {
@@ -89,7 +91,6 @@ app.post('/register', (req, res) => {
   users[id] = newUser;
   res.cookie(USER_ID_KEY_COOKIE, id);
 
-  console.log(`New user: ${newUser.email} created!`);
   res.redirect('/urls');
 });
 
@@ -116,7 +117,7 @@ app.post('/login', (req, res) => {
     return;
   }
 
-  if (foundUser.password !== password) {
+  if (!bcrypt.compareSync(password, foundUser.password)) {
     res.status(403).send(`Password associated with ${foundUser.email} was incorrect.`);
     return;
   }
