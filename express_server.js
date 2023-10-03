@@ -14,6 +14,7 @@ const urlDatabase = {
 };
 
 app.get('/', (req, res) => {
+  // In the future should redirect to login page if not logged in already.
   res.redirect('/urls');
 });
 
