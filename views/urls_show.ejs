@@ -17,6 +17,18 @@
       <div class="card-header"></div>
       <div class="card-body">
         <h5 class="card-title">TinyURL for: <%= longURL %></h5>
+        <form class="form-inline" method="POST" action="/urls/<%= urlId %>/update" style="justify-content: center; gap: 5px;">
+          <label for="newLongURL">Update redirect URL:</label>
+          <input 
+          class="form-control"
+          type="text"
+          name="newLongURL"
+          placeholder="http://"
+          />
+          <button type="submit" class="btn btn-outline-success">
+            Update
+          </button>
+        </form>
         <p class="card-text">
           Short URL ID: <a href="/u/<%= urlId %>"><%= urlId %></a>
         </p>
