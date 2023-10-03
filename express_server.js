@@ -62,13 +62,12 @@ app.post('/register', (req, res) => {
 
   users[id] = newUser;
 
-  res.cookie('user_id', id);
-
   console.log(`New user: ${newUser.email} created!`);
   res.redirect('/urls');
 });
 
 app.get('/login', (req, res) => {
+  console.log('Currently in login page, current available users:', users);
   const templateVars = {
     user: null
   };
@@ -79,20 +78,25 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
   const foundUser = getUserByEmail(users, email);
-  console.log('FOUNDUSER:', foundUser);
-  if (foundUser && foundUser.email === email && foundUser.password === password) {
-    res.cookie('user_id', foundUser.id);
-    res.redirect('/urls');
+  if (!foundUser) {
+    res.status(403).send(`Could not find user with email: ${email}`);
     return;
   }
-  res.status(400).send('User does not exist or gave wrong login credentials.');
+
+  if (foundUser.password !== password) {
+    res.status(403).send(`Password associated with ${foundUser.email} was incorrect.`);
+    return;
+  }
+
+  res.cookie('user_id', foundUser.id);
+  res.redirect('/urls');
 });
 
 app.post('/logout', (req, res) => {
   if (req.cookies[USER_ID_KEY_COOKIE]) {
     res.clearCookie(USER_ID_KEY_COOKIE);
   }
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 
 app.get('/urls', (req, res) => {
