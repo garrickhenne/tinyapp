@@ -1,6 +1,6 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
-const { generateRandomString } = require('./util');
+const { generateRandomString, getUserByEmail } = require('./util');
 
 const app = express();
 const PORT = 8080;
@@ -43,6 +43,11 @@ app.post('/register', (req, res) => {
   // TODO: Add validation for empty password or email. (Or maybe try to do this check client side)
   // TODO: Add validation for email already in use.
   const { email, password } = req.body;
+  if (!email || !password) {
+    console.log('Client sent missing email and/or password.');
+    res.status(400).send('Email and/or password was not filled in.');
+    return;
+  }
   console.log('body', req.body);
   const id = generateRandomString();
   const newUser = {
@@ -50,6 +55,13 @@ app.post('/register', (req, res) => {
     email,
     password
   };
+
+  if (getUserByEmail(users, newUser.email)) {
+    res.status(400).send('Email already exists in users.');
+    console.log('Client tried to register user that already exists. Email: ', newUser.email);
+    return;
+  }
+
   users[id] = newUser;
 
   res.cookie('user_id', id);
