@@ -40,15 +40,13 @@ app.get('/register', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
-  // TODO: Add validation for empty password or email. (Or maybe try to do this check client side)
-  // TODO: Add validation for email already in use.
   const { email, password } = req.body;
   if (!email || !password) {
     console.log('Client sent missing email and/or password.');
     res.status(400).send('Email and/or password was not filled in.');
     return;
   }
-  console.log('body', req.body);
+
   const id = generateRandomString();
   const newUser = {
     id,
@@ -67,17 +65,30 @@ app.post('/register', (req, res) => {
   res.cookie('user_id', id);
 
   console.log(`New user: ${newUser.email} created!`);
-  console.log('Current users: ', users);
   res.redirect('/urls');
+});
+
+app.get('/login', (req, res) => {
+  const templateVars = {
+    user: null
+  };
+  // user is always null when we go to login endpoint.
+  res.render('login', templateVars);
 });
 
 app.post('/login', (req, res) => {
-  // Currently this endpoint is dead.
-  res.redirect('/urls');
+  const { email, password } = req.body;
+  const foundUser = getUserByEmail(users, email);
+  console.log('FOUNDUSER:', foundUser);
+  if (foundUser && foundUser.email === email && foundUser.password === password) {
+    res.cookie('user_id', foundUser.id);
+    res.redirect('/urls');
+    return;
+  }
+  res.status(400).send('User does not exist or gave wrong login credentials.');
 });
 
 app.post('/logout', (req, res) => {
-  console.log('cookies', req.cookies[USER_ID_KEY_COOKIE]);
   if (req.cookies[USER_ID_KEY_COOKIE]) {
     res.clearCookie(USER_ID_KEY_COOKIE);
   }
@@ -100,7 +111,6 @@ app.get('/urls/new', (req, res) => {
 });
 
 app.post('/urls', (req, res) => {
-  console.log(req.body);
   const randomString = generateRandomString();
 
   if (urlDatabase[randomString]) {
