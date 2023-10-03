@@ -40,6 +40,13 @@ app.post('/urls', (req, res) => {
   res.redirect(`/urls/${randomString}`);
 });
 
+app.post('/urls/:id/delete', (req, res) => {
+  console.log(req.params);
+  const urlId = req.params.id;
+  delete urlDatabase[urlId];
+  res.redirect('/urls');
+});
+
 app.get('/urls/:id', (req, res) => {
   const urlId = req.params.id;
   console.log(urlId);
