@@ -33,9 +33,14 @@ app.get('/', (req, res) => {
 });
 
 app.get('/register', (req, res) => {
-  const userId = req.cookies[USER_ID_KEY_COOKIE];
+  // If cookie already exists, meaning there is a user, just redirect to /urls.
+  if (req.cookies[USER_ID_KEY_COOKIE] && users[req.cookies[USER_ID_KEY_COOKIE]]) {
+    res.redirect('/urls');
+    return;
+  }
+
   res.render('register', {
-    user: users[userId]
+    user: null
   });
 });
 
@@ -67,7 +72,13 @@ app.post('/register', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
+  // If cookie already exists, meaning there is a user, just redirect to /urls.
   console.log('Currently in login page, current available users:', users);
+  if (req.cookies[USER_ID_KEY_COOKIE] && users[req.cookies[USER_ID_KEY_COOKIE]]) {
+    res.redirect('/urls');
+    return;
+  }
+
   const templateVars = {
     user: null
   };
