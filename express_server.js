@@ -26,7 +26,7 @@ app.post('/login', (req, res) => {
 app.post('/logout', (req, res) => {
   console.log('cookies', req.cookies['username']);
   if (req.cookies['username']) {
-    req.cookies['username'] = undefined;
+    res.clearCookie('username');
   }
   res.redirect('/urls');
 });
