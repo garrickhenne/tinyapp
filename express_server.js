@@ -28,6 +28,14 @@ app.get('/urls/new', (req, res) => {
 app.post('/urls', (req, res) => {
   console.log(req.body);
   const randomString = generateRandomString();
+
+  if (urlDatabase[randomString]) {
+    console.log('Randomly generated string was already in use. Bad luck... (or really good luck).');
+    // set res status code to the one corresponding to server error.
+    res.statusCode = 500;
+    res.send('Internal server error. Please try again.');
+  }
+
   urlDatabase[randomString] = req.body.longURL;
   res.redirect(`/urls/${randomString}`);
 });
