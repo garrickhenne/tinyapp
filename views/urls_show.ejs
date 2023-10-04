@@ -32,6 +32,27 @@
         <p class="card-text">
           Short URL ID: <a href="/u/<%= urlId %>" target="_blank"><%= urlId %></a>
         </p>
+        <p class="card-text">Current hits: <%= count ? count : 0 %></p>
+        <p class="card-text">Unique visitors: <%= uniqueVisitorCount ? uniqueVisitorCount : 0 %></p>
+        <% console.log(visits)%>
+        <% if (visits && visits.length !== 0) { %>
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Visitors ID</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% for (let visit of visits) { %>
+                <tr>
+                  <td><%= visit.time %></td>
+                  <td><%= visit.visitorID %></td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        <% } %>
       </div>
       <div class="card-footer text-muted"></div>
     </div>

@@ -193,6 +193,9 @@ app.get('/urls/:id', (req, res) => {
   res.render('urls_show', {
     urlId: urlID,
     longURL: urlDatabase[urlID].longURL,
+    count: urlDatabase[urlID].count,
+    uniqueVisitorCount: urlDatabase[urlID].uniqueVisitorCount,
+    visits: urlDatabase[urlID].visits,
     user: users[userID]
   });
 });
@@ -251,8 +254,27 @@ app.get('/u/:id', (req, res) => {
   // Get short ID from request params.
   const { id } = req.params;
 
+  const urlObj = urlDatabase[id];
+
   // Redirect to original URL name.
-  const longURL = urlDatabase[id].longURL;
+  const longURL = urlObj.longURL;
+  urlObj.count = urlObj.count ? urlObj.count + 1 : 1;
+
+  // Incoming request is from unique visitor.
+  if (!req.session.visitor_id) {
+    // eslint-disable-next-line camelcase
+    req.session.visitor_id = generateRandomString();
+    urlObj.uniqueVisitorCount = urlObj.uniqueVisitorCount ? urlObj.uniqueVisitorCount + 1 : 1;
+  }
+
+  // Track each visit with timestamp, and generated visitor_id
+  console.log('Visits in /u/:id', urlObj.visits);
+  const visitObject = { time: new Date().toLocaleString(), visitorID: req.session.visitor_id };
+  if (urlObj.visits) {
+    urlObj.visits.push(visitObject);
+  } else {
+    urlObj.visits = [visitObject];
+  }
 
   // If there is no longURL associated with short ID, send error code.
   if (!longURL) {
