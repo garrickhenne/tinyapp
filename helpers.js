@@ -7,6 +7,10 @@ const generateRandomString = () => {
 
 // Return true if email exists in users object.
 const getUserByEmail = (users, email) => {
+  if (!users || !email || Array.isArray(users)) {
+    throw Error('getUserByEmail requires valid users and email.');
+  }
+
   for (const user in users) {
     if (users[user].email === email) {
       return users[user];
