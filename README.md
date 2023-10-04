@@ -4,8 +4,13 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
-!["screenshot description"](#)
-!["screenshot description"](#)
+!["screenshot of urls list view"](./docs/urls-list.png)
+!["screenshot of single url edit view"](./docs/edit-url-view.png)
+!["screenshot of login page"](./docs/login-view.png)
+
+## Some cool features
+- Retrieves analytics of link usage such as total views, total unique viewers, and a list of times the link was used and by who.
+- Link collections are kept by user account to allow private creation but public sharing!
 
 ## Dependencies
 
