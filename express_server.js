@@ -2,6 +2,7 @@ const express = require('express');
 const cookieSession = require('cookie-session');
 const { generateRandomString, getUserByEmail } = require('./helpers');
 const bcrypt = require('bcryptjs');
+const methodOverride = require('method-override');
 
 const app = express();
 const PORT = 8080;
@@ -11,17 +12,9 @@ app.use(cookieSession({
   name: 'session',
   keys: ['key1']
 }));
+app.use(methodOverride('_method'));
 
-const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "aJ48lW",
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "aJ48lW",
-  },
-};
+const urlDatabase = {};
 
 const users = {};
 
@@ -41,8 +34,7 @@ const urlsForUser = (userId) => {
 const isUserLoggedIn = (idCookie) => users[idCookie];
 
 app.get('/', (req, res) => {
-  // In the future should redirect to login page if not logged in already.
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 
 app.get('/register', (req, res) => {
@@ -206,7 +198,7 @@ app.get('/urls/:id', (req, res) => {
 });
 
 
-app.post('/urls/:id', (req, res) => {
+app.put('/urls/:id', (req, res) => {
   const userID = req.session.user_id;
   // Send error if user is not logged in.
   if (!isUserLoggedIn(userID)) {
@@ -231,7 +223,7 @@ app.post('/urls/:id', (req, res) => {
   res.redirect('/urls');
 });
 
-app.post('/urls/:id/delete', (req, res) => {
+app.delete('/urls/:id/', (req, res) => {
   const userID = req.session.user_id;
   // Send error if user is not logged in.
   if (!isUserLoggedIn(userID)) {
