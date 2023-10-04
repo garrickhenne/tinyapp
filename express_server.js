@@ -1,14 +1,16 @@
 const express = require('express');
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const { generateRandomString, getUserByEmail } = require('./util');
 const bcrypt = require('bcryptjs');
 
 const app = express();
 const PORT = 8080;
-const USER_ID_KEY_COOKIE = 'user_id';
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1']
+}));
 
 const urlDatabase = {
   b6UTxQ: {
@@ -21,18 +23,7 @@ const urlDatabase = {
   },
 };
 
-const users = {
-  // aJ48lW: {
-  //   id: "aJ48lW",
-  //   email: "user@example.com",
-  //   password: "123",
-  // },
-  // user2RandomID: {
-  //   id: "user2RandomID",
-  //   email: "user2@example.com",
-  //   password: "dishwasher-funk",
-  // },
-};
+const users = {};
 
 const urlsForUser = (userId) => {
   let usersURLs = {};
@@ -56,7 +47,7 @@ app.get('/', (req, res) => {
 
 app.get('/register', (req, res) => {
   // If cookie already exists, meaning there is a user, just redirect to /urls.
-  if (isUserLoggedIn(req.cookies[USER_ID_KEY_COOKIE])) {
+  if (isUserLoggedIn(req.session.user_id)) {
     res.redirect('/urls');
     return;
   }
@@ -89,7 +80,8 @@ app.post('/register', (req, res) => {
   }
 
   users[id] = newUser;
-  res.cookie(USER_ID_KEY_COOKIE, id);
+  // eslint-disable-next-line camelcase
+  req.session.user_id = id;
 
   res.redirect('/urls');
 });
@@ -97,7 +89,7 @@ app.post('/register', (req, res) => {
 app.get('/login', (req, res) => {
   // If cookie already exists, meaning there is a user, just redirect to /urls.
   console.log('Currently in login page, current available users:', users);
-  if (isUserLoggedIn(req.cookies[USER_ID_KEY_COOKIE])) {
+  if (isUserLoggedIn(req.session.user_id)) {
     res.redirect('/urls');
     return;
   }
@@ -122,19 +114,20 @@ app.post('/login', (req, res) => {
     return;
   }
 
-  res.cookie('user_id', foundUser.id);
+  // eslint-disable-next-line camelcase
+  req.session.user_id = foundUser.id;
   res.redirect('/urls');
 });
 
 app.post('/logout', (req, res) => {
-  if (req.cookies[USER_ID_KEY_COOKIE]) {
-    res.clearCookie(USER_ID_KEY_COOKIE);
+  if (req.session.user_id) {
+    req.session = null;
   }
   res.redirect('/login');
 });
 
 app.get('/urls', (req, res) => {
-  const userID = req.cookies[USER_ID_KEY_COOKIE];
+  const userID = req.session.user_id;
   console.log('ALL URLS FOR ALL USERS:', urlDatabase);
   if (!isUserLoggedIn(userID)) {
     res.status(400).send('Must be logged in to view shortened URLs.');
@@ -150,7 +143,7 @@ app.get('/urls', (req, res) => {
 
 app.post('/urls', (req, res) => {
   // Only logged in users can enter.
-  if (!isUserLoggedIn(req.cookies[USER_ID_KEY_COOKIE])) {
+  if (!isUserLoggedIn(req.session.user_id)) {
     res.status(400).send('Must be logged in to shorten URLS.');
     return;
   }
@@ -164,7 +157,7 @@ app.post('/urls', (req, res) => {
     res.send('Internal server error. Please try again.');
   }
   const { longURL } = req.body;
-  const userID = users[req.cookies[USER_ID_KEY_COOKIE]].id;
+  const userID = users[req.session.user_id].id;
   urlDatabase[randomString] = {
     longURL,
     userID
@@ -173,7 +166,7 @@ app.post('/urls', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
-  const userID = req.cookies[USER_ID_KEY_COOKIE];
+  const userID = req.session.user_id;
   // Only logged in users can enter.
   if (!isUserLoggedIn(userID)) {
     res.redirect('/login');
@@ -186,7 +179,7 @@ app.get('/urls/new', (req, res) => {
 });
 
 app.get('/urls/:id', (req, res) => {
-  const userID = req.cookies[USER_ID_KEY_COOKIE];
+  const userID = req.session.user_id;
   // Send error if user is not logged in.
   if (!isUserLoggedIn(userID)) {
     res.status(400).send('Must be logged in to access short URL.');
@@ -214,7 +207,7 @@ app.get('/urls/:id', (req, res) => {
 
 
 app.post('/urls/:id', (req, res) => {
-  const userID = req.cookies[USER_ID_KEY_COOKIE];
+  const userID = req.session.user_id;
   // Send error if user is not logged in.
   if (!isUserLoggedIn(userID)) {
     res.status(400).send('Must be logged in to access short URL.');
@@ -239,7 +232,7 @@ app.post('/urls/:id', (req, res) => {
 });
 
 app.post('/urls/:id/delete', (req, res) => {
-  const userID = req.cookies[USER_ID_KEY_COOKIE];
+  const userID = req.session.user_id;
   // Send error if user is not logged in.
   if (!isUserLoggedIn(userID)) {
     res.status(400).send('Must be logged in to access short URL.');
