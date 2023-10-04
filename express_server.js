@@ -52,7 +52,6 @@ app.get('/register', (req, res) => {
 app.post('/register', (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    console.log('Client sent missing email and/or password.');
     res.status(400).send('Email and/or password was not filled in.');
     return;
   }
@@ -67,7 +66,6 @@ app.post('/register', (req, res) => {
 
   if (getUserByEmail(users, newUser.email)) {
     res.status(400).send('Email already exists in users.');
-    console.log('Client tried to register user that already exists. Email: ', newUser.email);
     return;
   }
 
@@ -80,7 +78,6 @@ app.post('/register', (req, res) => {
 
 app.get('/login', (req, res) => {
   // If cookie already exists, meaning there is a user, just redirect to /urls.
-  console.log('Currently in login page, current available users:', users);
   if (isUserLoggedIn(req.session.user_id)) {
     res.redirect('/urls');
     return;
@@ -120,7 +117,6 @@ app.post('/logout', (req, res) => {
 
 app.get('/urls', (req, res) => {
   const userID = req.session.user_id;
-  console.log('ALL URLS FOR ALL USERS:', urlDatabase);
   if (!isUserLoggedIn(userID)) {
     res.status(400).send('Must be logged in to view shortened URLs.');
     return;
@@ -143,10 +139,9 @@ app.post('/urls', (req, res) => {
   const randomString = generateRandomString();
 
   if (urlDatabase[randomString]) {
-    console.log('Randomly generated string was already in use. Bad luck... (or really good luck).');
     // set res status code to the one corresponding to server error.
     res.statusCode = 500;
-    res.send('Internal server error. Please try again.');
+    res.send('Internal server error. Please try again. Randomly generated string was already in use. Bad luck... (or really good luck).');
   }
   const { longURL } = req.body;
   const userID = users[req.session.user_id].id;
@@ -268,7 +263,6 @@ app.get('/u/:id', (req, res) => {
   }
 
   // Track each visit with timestamp, and generated visitor_id
-  console.log('Visits in /u/:id', urlObj.visits);
   const visitObject = { time: new Date().toLocaleString(), visitorID: req.session.visitor_id };
   if (urlObj.visits) {
     urlObj.visits.push(visitObject);
