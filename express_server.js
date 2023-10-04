@@ -34,6 +34,7 @@ const urlsForUser = (userId) => {
 const isUserLoggedIn = (idCookie) => users[idCookie];
 
 app.get('/', (req, res) => {
+  // /login endpoint will redirect to /urls if user is logged in already.
   res.redirect('/login');
 });
 
@@ -64,6 +65,7 @@ app.post('/register', (req, res) => {
     password: hashedPassword
   };
 
+  // Return error code if user with email already exists.
   if (getUserByEmail(users, newUser.email)) {
     res.status(400).send('Email already exists in users.');
     return;
@@ -117,6 +119,7 @@ app.post('/logout', (req, res) => {
 
 app.get('/urls', (req, res) => {
   const userID = req.session.user_id;
+  // Return status 400 if currently not logged in.
   if (!isUserLoggedIn(userID)) {
     res.status(400).send('Must be logged in to view shortened URLs.');
     return;
@@ -141,7 +144,7 @@ app.post('/urls', (req, res) => {
   if (urlDatabase[randomString]) {
     // set res status code to the one corresponding to server error.
     res.statusCode = 500;
-    res.send('Internal server error. Please try again. Randomly generated string was already in use. Bad luck... (or really good luck).');
+    res.send('Internal server error. Please try again. Randomly generated string was already in use. Bad luck... (or really good luck?).');
   }
   const { longURL } = req.body;
   const userID = users[req.session.user_id].id;
@@ -206,11 +209,13 @@ app.put('/urls/:id', (req, res) => {
 
   const urlID = req.params.id;
 
+  // Send error code if short URL does not exist.
   if (!urlDatabase[urlID]) {
     res.status(400).send('Short URL does not exist');
     return;
   }
 
+  // Send error code if short URL does not belong to current logged in user.
   if (urlDatabase[urlID].userID !== userID) {
     res.status(400).send('Cannot access short URL that does not belong to user.');
     return;
@@ -231,11 +236,13 @@ app.delete('/urls/:id/', (req, res) => {
 
   const urlID = req.params.id;
 
+  // Send error code if short URL does not exist.
   if (!urlDatabase[urlID]) {
     res.status(400).send('short url id does not exist.');
     return;
   }
 
+  // Send error code if short URL does not belong to current logged in user.
   if (urlDatabase[urlID].userID !== userID) {
     res.status(400).send('Cannot delete urls that do not belong to you.');
     return;
@@ -250,6 +257,10 @@ app.get('/u/:id', (req, res) => {
   const { id } = req.params;
 
   const urlObj = urlDatabase[id];
+  if (!urlObj) {
+    res.status(400).send('Short URL ID does not exist.');
+    return;
+  }
 
   // Redirect to original URL name.
   const longURL = urlObj.longURL;
